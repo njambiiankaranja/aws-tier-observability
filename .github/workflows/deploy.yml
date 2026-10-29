@@ -14,32 +14,27 @@ jobs:
     name: "Terraform Validate & Plan"
     runs-on: ubuntu-latest
 
-    # Injecting AWS credentials globally at the job level 
-    # ensures they are available to every single step, including terraform init.
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_REGION: "us-east-1"
-
     steps:
-      # 1. Checkout repository code
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 2. Set up Terraform CLI
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: "us-east-1"
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.5.7"
 
-      # 3. Initialize Terraform (now natively detects job-level AWS credentials)
       - name: Terraform Init
         run: terraform init
 
-      # 4. Validate Terraform configuration syntax
       - name: Terraform Validate
         run: terraform validate
 
-      # 5. Run Terraform Plan to check infrastructure changes
       - name: Terraform Plan
         run: terraform plan -no-color
