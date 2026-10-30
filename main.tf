@@ -25,3 +25,6 @@ module "ecs" {
   alb_sg_id          = module.security_groups.alb_sg_id
   ecs_tasks_sg_id    = module.security_groups.ecs_tasks_sg_id
 }
+module "observability" {
+  source = "./modules/observability"
+}
