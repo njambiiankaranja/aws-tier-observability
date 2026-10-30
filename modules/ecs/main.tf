@@ -102,12 +102,21 @@ resource "aws_ecs_task_definition" "app" {
   container_definitions = jsonencode([
     {
       name      = "web"
-      image     = "public.ecr.aws/docker/library/node:18-alpine" # Placeholder public image for testing; will update to ECR
+      image     = "public.ecr.aws/docker/library/node:18-alpine" # Placeholder public image; replace with an ECR image for a real app
       essential = true
+
+      # Minimal Node.js web server: answers 200 on /healthz and on every other path
+      command = [
+        "node", "-e",
+        "require('http').createServer((req,res)=>{res.writeHead(200,{'Content-Type':'text/plain'});res.end(req.url==='/healthz'?'ok':'aws-tier-observability: ECS Fargate service behind an ALB is healthy');}).listen(3000)"
+      ]
+
       portMappings = [{
         containerPort = 3000
         hostPort      = 3000
+        protocol      = "tcp"
       }]
+
       logConfiguration = {
         logDriver = "awslogs"
         options = {
